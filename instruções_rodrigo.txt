@@ -1,0 +1,7 @@
+ -	Implementar o aumento do salário base em percentual e para todas as tabelas ao mesmo tempo e também somente para uma. 
+
+ -	Existe uma tabela de núcleo/grupo, dentro do grupo existe a tabela por nível e essas tabelas se replicam de acordo com a carga horário (que nada mais é que a proporcionalidade), salário-base é do nível/cargahorária;
+
+ - Cenário de aumento de percentual ou valor de alguma gratificação específica; 
+
+ - Incorporar uma percentual  de alguma gratificação dentro do salário-base;
