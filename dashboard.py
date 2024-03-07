@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import locale
 import plotly.express as px
 from streamlit_modal import Modal
 import streamlit.components.v1 as components
@@ -8,8 +7,6 @@ import streamlit.components.v1 as components
 
 
 st.set_page_config(layout="wide",page_title="Prefeitura de Fortaleza", page_icon='./logo.png')
-
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 # Função para carregar os dados do Excel
 @st.cache_data
@@ -262,11 +259,11 @@ def main():
     
     # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
     
-    impacto_mensal_total = locale.currency(impacto_mensal + impacto_mensal_impacto, grouping=True)
-    impacto_anual_total = locale.currency(impacto_anual + (impacto_mensal_impacto * 12), grouping=True)
+    impacto_mensal_total = impacto_mensal + impacto_mensal_impacto
+    impacto_anual_total = impacto_anual + (impacto_mensal_impacto * 12)
     
-    variacao_mensal_liquida = locale.currency(valor_mensal_novo + impacto_mensal_novo, grouping=True)
-    variacao_anual_liquida = locale.currency(valor_anual_novo + (impacto_mensal_novo*12), grouping=True)
+    variacao_mensal_liquida = valor_mensal_novo + impacto_mensal_novo
+    variacao_anual_liquida = valor_anual_novo + (impacto_mensal_novo*12)
     
     percentual_efetivo_aumento_mensal = ((impacto_mensal + impacto_mensal_impacto)/(valor_mensal_anterior + impacto_mensal_ant))*100
 
@@ -336,7 +333,7 @@ def main():
     
     # Exibir a tabela de resumo de cargos
     st.header("Impacto da Reestruturação do PCCS da Gestão do Trânsito:")
-    st.dataframe(resumo_cargos.applymap(lambda x: locale.currency(x, grouping=True).format(x) if isinstance(x, (int, float)) else x))
+    st.dataframe(resumo_cargos)
     
     # Criar DataFrame com os resultados
     dados = {
@@ -349,9 +346,9 @@ def main():
     tabela = pd.DataFrame(dados)
 
     # Formatando valores para exibição
-    tabela['Remuneração Anterior'] = tabela['Remuneração Anterior'].apply(lambda x: locale.currency(x, grouping=True))
-    tabela['Remuneração Nova'] = tabela['Remuneração Nova'].apply(lambda x: locale.currency(x, grouping=True))
-    tabela['Impacto'] = tabela['Impacto'].apply(lambda x: locale.currency(x, grouping=True))
+    tabela['Remuneração Anterior'] = tabela['Remuneração Anterior']
+    tabela['Remuneração Nova'] = tabela['Remuneração Nova']
+    tabela['Impacto'] = tabela['Impacto']
     
     styled_table = tabela.style.apply(lambda s: ['background-color: #dcdcdc; font-weight: bold' if s.name == 3 or s.name == 4 else '' for i in s], axis=1)
 
@@ -371,9 +368,9 @@ def main():
     tabela_dados_totais = pd.DataFrame(dados_totais)
 
     # Formatando valores para exibição
-    tabela_dados_totais['Remuneração Anterior'] = tabela_dados_totais['Remuneração Anterior'].apply(lambda x: locale.currency(x, grouping=True))
-    tabela_dados_totais['Remuneração Nova'] = tabela_dados_totais['Remuneração Nova'].apply(lambda x: locale.currency(x, grouping=True))
-    tabela_dados_totais['Impacto'] = tabela_dados_totais['Impacto'].apply(lambda x: locale.currency(x, grouping=True))
+    tabela_dados_totais['Remuneração Anterior'] = tabela_dados_totais['Remuneração Anterior']
+    tabela_dados_totais['Remuneração Nova'] = tabela_dados_totais['Remuneração Nova']
+    tabela_dados_totais['Impacto'] = tabela_dados_totais['Impacto']
     
     st.header("Totais:")
     st.dataframe(tabela_dados_totais)
