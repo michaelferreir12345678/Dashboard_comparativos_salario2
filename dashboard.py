@@ -9,7 +9,14 @@ import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide",page_title="Prefeitura de Fortaleza", page_icon='./logo.png')
 
-locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+try:
+    locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+except locale.Error:
+    print("Localidade 'pt_BR.utf8' não está disponível. Tentando com 'pt_BR'...")
+    try:
+        locale.setlocale(locale.LC_ALL, 'pt_BR')
+    except locale.Error:
+        print("Localidade 'pt_BR' também não está disponível.")
 
 # Função para carregar os dados do Excel
 @st.cache_data
