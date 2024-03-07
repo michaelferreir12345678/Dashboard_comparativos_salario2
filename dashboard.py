@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 from streamlit_modal import Modal
 import streamlit.components.v1 as components
+from streamlit.components.v1 import html
 
 
 
@@ -129,8 +130,12 @@ def main():
     
     # Adicionando imagem centralizada acima do título da sidebar
     st.sidebar.image('logo.png', width=150, use_column_width=True)
-
+    
     st.sidebar.header('Configurações')
+    
+    if st.sidebar.button("Alterar Salário base"):
+        test_salariobase = st.sidebar._number_input('Test para alteração salariobase: ', value=2000)
+    
     indice_tabela = st.sidebar.number_input('Enquadramento:', min_value=0, value=0)
 
     # Parâmetros Tabela 1
@@ -265,6 +270,7 @@ def main():
     
     # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
     
+   
     impacto_mensal_total = formatar_moeda(impacto_mensal + impacto_mensal_impacto)
     impacto_anual_total = formatar_moeda(impacto_anual + (impacto_mensal_impacto * 12))
     
@@ -382,11 +388,6 @@ def main():
     st.dataframe(tabela_dados_totais)
     
 
-
-    modal = Modal(
-        "Demo Modal", 
-        key="demo-modal")
-    
     
 if __name__ == '__main__':
     main()
