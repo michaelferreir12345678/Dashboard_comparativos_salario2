@@ -9,7 +9,7 @@ import streamlit.components.v1 as components
 
 st.set_page_config(layout="wide",page_title="Prefeitura de Fortaleza", page_icon='./logo.png')
 
-locale.setlocale(locale.LC_ALL, 'pt_BR')
+locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 
 # Função para carregar os dados do Excel
 @st.cache_data
