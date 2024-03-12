@@ -5,8 +5,6 @@ from streamlit_modal import Modal
 import streamlit.components.v1 as components
 from streamlit.components.v1 import html
 
-
-
 st.set_page_config(layout="wide",page_title="Prefeitura de Fortaleza", page_icon='./logo.png')
 
 def formatar_moeda(valor):
@@ -98,7 +96,7 @@ def calcular_irpf(base_irpf):
 def calcular_novo_salario(df, salario_base_b_180,salario_base_c_180,salario_base_d_180,salario_base_b_240,salario_base_c_240,salario_base_d_240, pular_indice=0):
     novo_salario = []  
     for indice_ref, ch, primeiro_caractere in zip(df['Ref'],df['CH'],df['primeiro_caractere']): 
-            indice_alvo = indice_ref + pular_indice
+            indice_alvo = indice_ref #+ pular_indice
             if ch == 180 and primeiro_caractere == 'B':
                 tabela = salario_base_b_180
             elif ch == 180 and primeiro_caractere == 'C':
@@ -131,12 +129,59 @@ def main():
     # Adicionando imagem centralizada acima do título da sidebar
     st.sidebar.image('logo.png', width=150, use_column_width=True)
     
-    st.sidebar.header('Configurações')
+    st.sidebar.subheader('Selecione as opções abaixo: ')
     
-    if st.sidebar.button("Alterar Salário base"):
-        test_salariobase = st.sidebar._number_input('Test para alteração salariobase: ', value=2000)
+    opções = {
+        "ACE & ACS": {  #ambiente
+            "ACS":  #Categoria
+                ["Tabela 1", "Tabela 2", "Tabela 3"],   #Nível
+            "ADA": 
+                ["Tabela 1", "Tabela 2", "Tabela 3"]
+        },
+        "AMC": {
+            "AMC": 
+                ["Tabela 1", "Tabela 2", "Tabela 3"]
+        },
+        "EDUCAÇÃO": {
+            "EDU": 
+                ["Tabela 1", "Tabela 2", "Tabela 3"]
+        },
+        # Adicione outras opções para os diferentes ambientes aqui
+    }
     
+    opcoes_carga_horaria = ["180", "240"]
+    opcao_ambiente = st.sidebar.selectbox("Selecione o Ambiente:", list(opções.keys()))
+    
+    # Seleção da categoria
+    opcoes_categoria = list(opções[opcao_ambiente].keys())
+    opcao_tab = st.sidebar.selectbox("Selecione a categoria:", opcoes_categoria)
+    
+        # Seleção do Nível
+    opcoes_nivel = opções[opcao_ambiente][opcao_tab]
+    opcao_nivel = st.sidebar.selectbox("Selecione o nível:", opcoes_nivel)
+
+    # Seleção da Carga Horária
+    opcao_carga_horaria = st.sidebar.selectbox("Selecione a Carga Horária:", opcoes_carga_horaria)
+
+
+    
+    # # Definindo as opções disponíveis para o segundo selectbox com base na seleção do primeiro selectbox
+    # if opcao_ambiente == "ACE & ACS":
+    #     opcao_tab = st.sidebar.selectbox("Selecione a categoria:", ["ACS", "ADA"])
+    # elif opcao_ambiente == "AMC":
+    #     opcao_tab = st.sidebar.selectbox("Selecione a categoria:", ["AMC"])
+    # elif opcao_ambiente == "EDUCAÇÃO":
+    #     opcao_tab = st.sidebar.selectbox("Selecione a categoria:", ["EDU"])
+    # # Continuar com as outras opções de acordo com a lógica desejada
+
+    # # Opções comuns para o terceiro e quarto selectbox
+    # opcao_nivel = st.sidebar.selectbox("Selecione o nível:", ["Tabela 1", "Tabela 2", "Tabela 3"])
+    # opcao_carga_horaria = st.sidebar.selectbox("Selecione a Carga Horária:", ["180", "240"])
+    
+    st.sidebar.subheader('Configurações: ')
+        
     indice_tabela = st.sidebar.number_input('Enquadramento:', min_value=0, value=0)
+    df['Ref'] = df['Ref'] + indice_tabela
 
     # Parâmetros Tabela 1
     TC1 = st.sidebar.number_input('Taxa de Classe (%):', value=2)
@@ -144,7 +189,7 @@ def main():
     num_classes1 = st.sidebar.number_input('Número de Classes:', value=5, min_value=1)
     num_referencias1 = st.sidebar.number_input('Número de Referências:', value=6, min_value=1)
     salario_base1 = st.sidebar.number_input('Salário Base:', value=1160.66, min_value=0.0)
-
+    
     salario_base_b_180 = 886.29
     salario_base_c_180 = 1160.66
     salario_base_d_180 = 1582.67
@@ -283,18 +328,18 @@ def main():
     st.markdown('##### **PERCENTUAL AUMENTO EFETIVO:**')
     st.info(f'{round(percentual_efetivo_aumento_mensal,2)} %')
 
+    col1, col2  = st.columns(2)
+    col1.text('Impacto Mensal:')
+    col1.info(impacto_mensal_total,)
+    col2.text('Impacto Anual: ')
+    col2.info(impacto_anual_total)
+
     col1, col2 = st.columns(2)
     col1.text('Novo Valor da folha Mensal: ')
     col1.info(variacao_mensal_liquida)
     col2.text('Novo Valor da folha Anual: ')
     col2.info(variacao_anual_liquida)
-
-    col1, col2  = st.columns(2)
-    col1.text('Impacto total Mensal:')
-    col1.info(impacto_mensal_total,)
-    col2.text('Impacto total Anual: ')
-    col2.info(impacto_anual_total)
-    
+   
     # Calcular as remunerações totais antes e depois
     remuneracao_total_anterior = valor_mensal_anterior + impacto_mensal_ant
     remuneracao_total_nova = valor_mensal_novo + impacto_mensal_novo
@@ -312,7 +357,8 @@ def main():
     fig_date = px.bar(df_plot_melted, x=df_plot_melted.index, y='Remuneração Total', 
                         title='Valores Antes e Depois',
                         labels={'Remuneração Total': 'Valor', 'index': 'Tipo'},
-                        color='variable')
+                        color='variable',
+                        )
 
     # Exibir o gráfico
     st.plotly_chart(fig_date, use_container_width=False)
@@ -345,7 +391,7 @@ def main():
     
     # Exibir a tabela de resumo de cargos
     st.header("Impacto da Reestruturação do PCCS da Gestão do Trânsito:")
-    st.dataframe(resumo_cargos.applymap(lambda x: formatar_moeda(x) if isinstance(x, (int, float)) else x))
+    st.dataframe(resumo_cargos.map(lambda x: formatar_moeda(x) if isinstance(x, (int, float)) else x))
     
     # Criar DataFrame com os resultados
     dados = {
