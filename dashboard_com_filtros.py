@@ -117,6 +117,34 @@ def calcular_novo_salario(df, salario_base_b_180,salario_base_c_180,salario_base
                 novo_salario.append(None)  # Adicionar None se não houver correspondência encontrada
     return novo_salario
 
+def atualizar_ita(row, taxa):
+    if row['Grau de instrução'] == "Médio Profissionalizante":
+        return row['REF-ITA'] + (taxa / 100)
+    elif row['Grau de instrução'] == "Médio Tecnólogo":
+        return row['REF-ITA'] +  (taxa / 100)
+    elif row['Grau de instrução'] == "Graduação":
+        return row['REF-ITA'] +  (taxa / 100)
+    elif row['Grau de instrução'] == "Especialização":
+        return row['REF-ITA'] +  (taxa / 100)
+    elif row['Grau de instrução'] == "Mestrado":
+        return row['REF-ITA'] +  (taxa / 100)
+    elif row['Grau de instrução'] == "Doutorado":
+        return row['REF-ITA'] + (taxa / 100)
+    else:
+        return row['REF-ITA']
+    
+def atualizar_geef(row, taxa):
+    if row['Enquadramento do GEEF'] == "Inciso I":
+        return row['REF-GEEF-AMC'] + (taxa / 100)
+    elif row['Enquadramento do GEEF'] == "Incisos II e V":
+        return row['REF-GEEF-AMC'] +  (taxa / 100)
+    elif row['Enquadramento do GEEF'] == "Inciso IV":
+        return row['REF-GEEF-AMC'] +  (taxa / 100)
+    elif row['Enquadramento do GEEF'] == "Inciso III, VI e VII":
+        return row['REF-GEEF-AMC'] +  (taxa / 100)
+    else:
+        return row['REF-GEEF-AMC']
+
 def main():
     
     st.header(' :orange[Prefeitura de Fortaleza] ', divider='rainbow')
@@ -142,6 +170,7 @@ def main():
             (df['Cat'].isin(categorias_selecionados)) |
             (df['Niv'].isin(niveis_selecionados)) |
             (df['CH'].isin(ch_selecionados))]
+
     
     # opções = {
     #     "ACE & ACS": {  #ambiente
@@ -268,35 +297,93 @@ def main():
     
     #inputs para as taxas de referências:
     st.sidebar.subheader('Alterar as taxas das referências: ')  
-    st.sidebar.write('Se vazio, será usada a a : ')  
-    taxa_ita = st.sidebar.number_input('Nova taxa ITA (%)')
-    taxa_anuenio = st.sidebar.number_input('Nova taxa Anuênio (%)')
-    taxa_insalubridade = st.sidebar.number_input('Nova taxa Insalubridade (%)')
-    taxa_gr_produtividade = st.sidebar.number_input('Nova taxa Produtividade (%)')
+    st.sidebar.write('Se vazio, será usada a atual: ')
+    
+    # Exibindo inputs quando o botão dos ITAs quando for acionado
+    show_inputs = st.sidebar.button("Alterar % do ITA")
+
+    if 'show_inputs' not in st.session_state:
+        st.session_state.show_inputs = False
+
+    if show_inputs:
+        st.session_state.show_inputs = True  
+        
+    if st.session_state.show_inputs:
+        st.sidebar.subheader('Inclua a(s) nova(s) taxa(s) do ITA')
+        if st.sidebar.button("Fechar e limpar ITA"):
+            st.session_state.show_inputs = False
+            st.experimental_rerun()
+        taxa_profissionalizante = st.sidebar.number_input('Médio Profissionalizante  (%)')
+        taxa_tecnologo  = st.sidebar.number_input('Tecnólogo  (%)')
+        taxa_graduação = st.sidebar.number_input('Graduação  (%)')
+        taxa_especialização = st.sidebar.number_input('Especialização (%)')
+        taxa_mestrado = st.sidebar.number_input('Mestrado(%)')
+        taxa_doutorado = st.sidebar.number_input('Doutorado(%)')
+        # Aplicando as atualizações
+        if taxa_profissionalizante:
+            df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_profissionalizante) if row['Grau de instrução'] == "Médio Profissionalizante" else row['REF-ITA'], axis=1)
+        if taxa_tecnologo:
+            df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_tecnologo) if row['Grau de instrução'] == "Médio Tecnólogo" else row['REF-ITA'], axis=1)
+        if taxa_graduação:
+            df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_graduação) if row['Grau de instrução'] == "Graduação" else row['REF-ITA'], axis=1)
+        if taxa_especialização:
+            df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_especialização) if row['Grau de instrução'] == "Especialização" else row['REF-ITA'], axis=1)
+        if taxa_mestrado:
+            df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_mestrado) if row['Grau de instrução'] == "Mestrado" else row['REF-ITA'], axis=1)
+        if taxa_doutorado:
+            df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_doutorado) if row['Grau de instrução'] == "Doutorado" else row['REF-ITA'], axis=1)
+            
+    # Exibindo inputs quando o botão dos GEEFs quando for acionado
+    show_inputs_geef = st.sidebar.button("Alterar % do GEEF")
+
+    if 'show_inputs_geef' not in st.session_state:
+        st.session_state.show_inputs_geef = False
+
+    if show_inputs_geef:
+        st.session_state.show_inputs_geef = True  
+        
+    if st.session_state.show_inputs_geef:
+        st.sidebar.subheader('Inclua a(s) nova(s) taxa(s) do GEEF')
+        if st.sidebar.button("Fechar e limpar GEEF"):
+            st.session_state.show_inputs_geef = False
+            st.experimental_rerun()
+        taxa_inciso_i = st.sidebar.number_input('Inciso I  (%)')
+        taxa_inciso_i_v  = st.sidebar.number_input('Inciso II e V  (%)')
+        taxa_inciso_iv = st.sidebar.number_input('Inciso IV  (%)')
+        taxa_inciso_iii_vi_vii = st.sidebar.number_input('Inciso III, VI e VII (%)')
+
+        # Aplicando as atualizações
+        if taxa_inciso_i:
+            df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_i) if row['Enquadramento do GEEF'] == "Inciso I" else row['REF-GEEF-AMC'], axis=1)
+        if taxa_inciso_i_v:
+            df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_i_v) if row['Enquadramento do GEEF'] == "Incisos II e V" else row['REF-GEEF-AMC'], axis=1)
+        if taxa_inciso_iv:
+            df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_iv) if row['Enquadramento do GEEF'] == "Inciso IV" else row['REF-GEEF-AMC'], axis=1)
+        if taxa_inciso_iii_vi_vii:
+            df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_iii_vi_vii) if row['Enquadramento do GEEF'] == "Inciso III, VI e VII" else row['REF-GEEF-AMC'], axis=1)
+    
     taxa_gat = st.sidebar.number_input('Nova taxa Gat (%)')
     taxa_geef_amc = st.sidebar.number_input('Nova taxa Geef-AMC (%)')
     taxa_gr_r_vida = st.sidebar.number_input('Nova taxa GR.R.VIDA (%)')
     taxa_ge_amc = st.sidebar.number_input('Nova taxa GE-AMC (%)')
-    taxa_hr_noturnas = st.sidebar.number_input('Nova taxa HR NOTURNAS (%)')   
-    taxa_gr_ser_extra = st.sidebar.number_input('Nova taxa GR.SER.EXTRA (%)')
     taxa_he_noturna = st.sidebar.number_input('Nova taxa HE NOTURNA (%)')
-    taxa_hr_extr_inco = st.sidebar.number_input('Nova taxa HR EXTRA INCO (%)')
-        
+    
+
     # Adicionando novas colunas
-    df['novo_0085-ITA'] = (((1+ df['REF-ITA']) * ( 1 + taxa_ita/100) - 1 )  * df['Novo Salário'])
-    df['novo_0107-ANUENIO'] = (((1+ df['REF-ANUENIO']) * ( 1 + taxa_anuenio/100) - 1 ) * df['Novo Salário'])
-    df['nova_105-INSALUBRIDAD'] = (((1+ df['REF-INSALUBRIDAD']) * ( 1+ taxa_insalubridade/100) - 1 ) * df['Novo Salário'])
-    df['nova_0118-GR.PRODUT_'] = (((1+ df['REF-GR.PRODUT']) * ( 1+ taxa_gr_produtividade/100) - 1 ) * df['Novo Salário'])
+    df['novo_0085-ITA'] = (df['REF-ITA']  * df['Novo Salário'])
+    df['novo_0107-ANUENIO'] = ((df['REF-ANUENIO']) * df['Novo Salário'])
+    df['nova_105-INSALUBRIDAD'] = (( df['REF-INSALUBRIDAD']) * df['Novo Salário'])
+    df['nova_0118-GR.PRODUT_'] = ((df['REF-GR.PRODUT']) * df['Novo Salário'])
     df['nova_0096-GAT'] = (((1+ df['REF-GAT']) * ( 1+ taxa_gat/100) - 1 ) * df['Novo Salário'])
     df['nova_0097-GEEF-AMC'] = (((1+ df['REF-GEEF-AMC']) * (1 + taxa_geef_amc/100) - 1) * df['Novo Salário'])
     df['nova_0159-GR.R.VIDA'] = (((1+ df['REF-GR.R.VIDA']) * (1 + taxa_gr_r_vida/100) - 1) * df['Novo Salário'])
     df['nova_0318-GE AMC'] = (((1+ df['REF-GE AMC']) * ( 1+ taxa_ge_amc/100) - 1 ) * df['Novo Salário'])
     df['novo_0817-B HR INC'] = df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0159-GR.R.VIDA'] + df['nova_0318-GE AMC']
-    df['nova_0133-HR.EXTR.INCO'] = round((df['novo_0817-B HR INC'] / df['CH'] * 1.25) * (df['REF-HR.EXTR.INCO'] * (1 +taxa_hr_extr_inco)),2)
+    df['nova_0133-HR.EXTR.INCO'] = round(df['novo_0817-B HR INC'] / df['CH'] * 1.25 * df['REF-HR.EXTR.INCO'],2)
     df['novo_0996-TOT.PROVENTO'] = df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0096-GAT'] + df['nova_0097-GEEF-AMC'] + df['nova_0159-GR.R.VIDA'] + df['nova_0318-GE AMC'] + df['nova_0133-HR.EXTR.INCO'] + df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['0308-DIF.AJ.PCCS'] + df['0320-GAJ 9903/12'] + df['0170-DIR.NIV.SUPE'] + df['0174-VRB.ESP.REP'] + df['0180-DIR.ASS.SUPE'] + df['0190-DIR.NIV.INT.'] + df['058-DIR GER 01'] + df['0326-GTRTC                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           '] + df['0206-AB.PERMANENC']
     df['nova_0872-B HR NOTURNA'] = df['nova_0133-HR.EXTR.INCO'] + df['0223-VP'] + df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0096-GAT'] + df['nova_0097-GEEF-AMC'] + df['nova_0159-GR.R.VIDA'] + df['nova_0318-GE AMC']
-    df['nova_0099-HR NOTURNAS'] = df['nova_0872-B HR NOTURNA'] / df['CH'] * 0.2 * ((1+ df['REF-HR NOTURNAS']) * ( 1+ taxa_hr_noturnas/100) - 1 ) *100
-    df['nova_0183-GR SER EXTRA'] = df['nova_0872-B HR NOTURNA'] / df['CH'] * 1.5 * ((1+ df['REF-GR SER EXTRA']) * (1 + taxa_gr_ser_extra/100) - 1 ) *100 
+    df['nova_0099-HR NOTURNAS'] = df['nova_0872-B HR NOTURNA'] / df['CH'] * 0.2 * df['REF-HR NOTURNAS']
+    df['nova_0183-GR SER EXTRA'] = df['nova_0872-B HR NOTURNA'] / df['CH'] * 1.5 * df['REF-GR SER EXTRA']
     df['nova_0383-HE NOTURNA'] = df['nova_0872-B HR NOTURNA'] / df['CH'] * 1.5 * 1.2 * ((1+ df['REF-HE NOTURNA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ']) * ( 1+ taxa_he_noturna/100) - 1 )*100
     df['nova_0801-IPM PREVFOR'] = df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0096-GAT'] + df['nova_0097-GEEF-AMC'] + df['nova_0318-GE AMC'] + df['nova_0133-HR.EXTR.INCO'] + df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['0308-DIF.AJ.PCCS'] 
     df['nova_IPM PREVFOR-PATRONAL'] = df['nova_0801-IPM PREVFOR'] * 0.28
@@ -306,7 +393,7 @@ def main():
     
     nova_ipm_previfor = df['nova_IPM PREVFOR-PATRONAL'].sum()    
     ipm_previfor_impacto = nova_ipm_previfor - ipm_previfor_anterior
-
+    
     resumo_cargos.loc[len(resumo_cargos)] = ['IPM – PREVIFOR-FIN (28%)', '', ipm_previfor_anterior, nova_ipm_previfor, ipm_previfor_impacto]
     
     impacto_mensal_ant = total_vencimento_base + provisao_ferias_rem_anterior + provisao_decimo_rem_anterior + provisao_ipm_rem_anterior + ipm_previfor_anterior
@@ -315,7 +402,6 @@ def main():
     resumo_cargos.loc[len(resumo_cargos)] = ['IMPACTO MENSAL', '', impacto_mensal_ant, impacto_mensal_novo, impacto_mensal_impacto]
     resumo_cargos.loc[len(resumo_cargos)] = ['IMPACTO ANUAL', '', impacto_mensal_ant*12, impacto_mensal_novo*12, impacto_mensal_impacto*12]
     
-        
     # Calcular imposto de renda para a Remuneração Anterior e Nova
     imposto_renda_anterior = df['IRPF'].sum()
     imposto_renda_novo = df['nova_IRPF'].sum()
@@ -342,9 +428,6 @@ def main():
     
     # variaveis de diferenças para o cálculo do percentual de aumento das gratificações
     dif_ita = df['novo_0085-ITA'].sum() - df['0085-ITA'].sum()
-    dif_anuenio = df['novo_0107-ANUENIO'].sum() - df['0107-ANUENIO'].sum()
-    dif_insalubridade = df['nova_105-INSALUBRIDAD'].sum() - df['105-INSALUBRIDAD'].sum()
-    dif_gr_produtividade = df['nova_0118-GR.PRODUT_'].sum() - df['0118-GR.PRODUT'].sum()
     dif_gat = df['nova_0096-GAT'].sum() - df['0096-GAT'].sum()
     dif_geef_amc = df['nova_0097-GEEF-AMC'].sum() - df['0097-GEEF-AMC'].sum()
     dif_gr_r_vida = df['nova_0159-GR.R.VIDA'].sum() - df['0159-GR.R.VIDA'].sum()
@@ -353,7 +436,6 @@ def main():
 
     # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
     
-   
     impacto_mensal_total = formatar_moeda(impacto_mensal + impacto_mensal_impacto)
     impacto_anual_total = formatar_moeda(impacto_anual + (impacto_mensal_impacto * 12))
     
@@ -381,9 +463,6 @@ def main():
     # Criando um dicionário com as diferenças
     diferencas = {
         'ITA': round(dif_ita,2),
-        'ANUENIO': round(dif_anuenio,2),
-        'INSALUBRIDADE': round(dif_insalubridade,2),
-        'GR.PRODUT': round(dif_gr_produtividade,2),
         'GAT': round(dif_gat,2),
         'GEEF-AMC': round(dif_geef_amc,2),
         'GR.R.VIDA': round(dif_gr_r_vida,2),
@@ -416,8 +495,6 @@ def main():
                         color='variable',
                         )
     
-    
-
     # Exibir o gráfico
     st.plotly_chart(fig_date, use_container_width=False)
 
