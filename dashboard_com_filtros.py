@@ -157,7 +157,7 @@ def main():
     
     df['primeiro_caractere'] = df['Niv'].str.slice(0, 1)
     
-    ambientes_selecionados = st.sidebar.multiselect('Selecione o(s) Ambiente(s):', df['Ambiente'].unique(), placeholder="Ambiente")
+    ambientes_selecionados = st.sidebar.multiselect('Selecione o(s) Ambiente(s):', df['Ambiente'].unique(), placeholder="Ambiente", )
     categorias_selecionados = st.sidebar.multiselect('Selecione a(s) Categoria(s):', df['Cat'].unique(), placeholder="Categoria")
     niveis_selecionados = st.sidebar.multiselect('Selecione o(s) Nível(s):', df['Niv'].unique(), placeholder="Nível")
     ch_selecionados = st.sidebar.multiselect('Selecione a(s) Carga Horária(s):', df['CH'].unique(), placeholder="Carga Horária")
@@ -179,6 +179,7 @@ def main():
         (df['Niv'].isin(niveis_selecionados)) &
         (df['CH'].isin(ch_selecionados))
     ]
+    
     
     st.sidebar.subheader('Configurações: ')
         
@@ -461,12 +462,12 @@ def main():
     st.plotly_chart(fig_date, use_container_width=False)
     
     # Nova tabela com o novo salário calculado
-    st.write("Nova tabela com o novo salário calculado usando a Tabela 1:")
+    st.write("Servidores:")
     st.dataframe(tabela_com_novo_salario.round(2), use_container_width=True)
     
     # Exibir e atualizar a tabela de salários por classe e referência (Tabela 1)
     tabela_salarios1, valores1 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base1, 'Tabela personalizável')
-    st.write("Tabela Personalizável")
+    st.write("Tabela de Referência")
     tabela_salarios1 = st.dataframe(tabela_salarios1, use_container_width=True)
     
     # Exibir a tabela de resumo de cargos
