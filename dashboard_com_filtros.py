@@ -6,7 +6,6 @@ import streamlit.components.v1 as components
 from streamlit.components.v1 import html
 import matplotlib.pyplot as plt
 
-
 st.set_page_config(layout="wide",page_title="Prefeitura de Fortaleza", page_icon='./logo.png')
 
 def formatar_moeda(valor):
