@@ -4,6 +4,8 @@ import plotly.express as px
 from streamlit_modal import Modal
 import streamlit.components.v1 as components
 from streamlit.components.v1 import html
+import matplotlib.pyplot as plt
+
 
 st.set_page_config(layout="wide",page_title="Prefeitura de Fortaleza", page_icon='./logo.png')
 
@@ -306,7 +308,7 @@ def main():
     df['nova_IPM PREVFOR-SERVIDOR'] = df['nova_0801-IPM PREVFOR'] * 0.14
     df['nova_base_IRPF'] = df['novo_0996-TOT.PROVENTO'] -  df['nova_IPM PREVFOR-SERVIDOR']            
     df['nova_IRPF'] = df['nova_base_IRPF'].apply(calcular_irpf)     
-
+    
     # Quantidade de pessoas por cargo, carga horária e referência
     quantidade_pessoas = contar_pessoas(df)
     
@@ -389,15 +391,7 @@ def main():
     valor_anual_novo = valor_mensal_novo * 12
     impacto_anual = valor_anual_novo - valor_anual_anterior
     
-    # variaveis de diferenças para o cálculo do percentual de aumento das gratificações
-    dif_ita = df['novo_0085-ITA'].sum() - df['0085-ITA'].sum()
-    dif_gat = df['nova_0096-GAT'].sum() - df['0096-GAT'].sum()
-    dif_geef_amc = df['nova_0097-GEEF-AMC'].sum() - df['0097-GEEF-AMC'].sum()
-    dif_gr_r_vida = df['nova_0159-GR.R.VIDA'].sum() - df['0159-GR.R.VIDA'].sum()
-    dif_ge_amc = df['nova_0318-GE AMC'].sum() - df['0318-GE AMC'].sum()    
-    
-
-    # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
+   # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
     
     impacto_mensal_total = formatar_moeda(impacto_mensal + impacto_mensal_impacto)
     impacto_anual_total = formatar_moeda(impacto_anual + (impacto_mensal_impacto * 12))
@@ -423,43 +417,79 @@ def main():
     col2.text('Novo Valor da folha Anual: ')
     col2.info(variacao_anual_liquida)
     
-    # Criando um dicionário com as diferenças
-    diferencas = {
-        'ITA': round(dif_ita,2),
-        'GAT': round(dif_gat,2),
-        'GEEF-AMC': round(dif_geef_amc,2),
-        'GR.R.VIDA': round(dif_gr_r_vida,2),
-        'GE AMC': round(dif_ge_amc,2)
+    # Criando um dicionário com as diferenças antes e depois do Ita
+    diferencas_antes = {
+        'ITA': df['0085-ITA'].sum(),
+        'GAT': df['0096-GAT'].sum(),
+        'GEEF-AMC': df['0097-GEEF-AMC'].sum(),
+        'GR.R.VIDA': df['0159-GR.R.VIDA'].sum(),
+        'GE AMC': df['0318-GE AMC'].sum()
     }
 
-    # Convertendo o dicionário em DataFrame
-    df_diferencas = pd.DataFrame.from_dict(diferencas, orient='index', columns=['Diferenças'])
+    diferencas_depois = {
+        'ITA': df['novo_0085-ITA'].sum(),
+        'GAT': df['nova_0096-GAT'].sum(),
+        'GEEF-AMC': df['nova_0097-GEEF-AMC'].sum(),
+        'GR.R.VIDA': df['nova_0159-GR.R.VIDA'].sum(),
+        'GE AMC': df['nova_0318-GE AMC'].sum()
+    }
+
+    # Convertendo os dicionários em DataFrames
+    df_diferencas_antes = pd.DataFrame.from_dict(diferencas_antes, orient='index', columns=['Antes'])
+    df_diferencas_depois = pd.DataFrame.from_dict(diferencas_depois, orient='index', columns=['Depois'])
+
+    # Concatenando os DataFrames de antes e depois
+    df_diferencas = pd.concat([df_diferencas_antes, df_diferencas_depois], axis=1)
 
     # Plotando o gráfico de barras
-    st.bar_chart(df_diferencas)    
-
-    # Calcular as remunerações totais antes e depois
-    remuneracao_total_anterior = valor_mensal_anterior + impacto_mensal_ant
-    remuneracao_total_nova = valor_mensal_novo + impacto_mensal_novo
-
-    # Criar um DataFrame com os totais de remuneração anterior e nova
-    df_plot = pd.DataFrame({
-        'Remuneração Total Anterior': [remuneracao_total_anterior.sum()],
-        'Remuneração Total Nova': [remuneracao_total_nova.sum()]
-    })
-
-    # Derreter o DataFrame para tornar as colunas de remuneração total em uma coluna
-    df_plot_melted = df_plot.melt(value_name='Remuneração Total')
-
-    # Criar o gráfico
-    fig_date = px.bar(df_plot_melted, x=df_plot_melted.index, y='Remuneração Total', 
-                        title='Valores',
-                        labels={'Remuneração Total': 'Valor', 'index': 'Tipo'},
-                        color='variable',
-                        )
+    fig_gratificacoes, ax = plt.subplots(figsize=(8, 3))
+    df_diferencas.plot(kind='bar', ax=ax)
+    ax.legend(["Antes", "Depois"])
+    ax.set_ylabel('Gratificações')
+    # st.pyplot(fig_gratificacoes)  
     
-    # Exibir o gráfico
-    st.plotly_chart(fig_date, use_container_width=False)
+    # Calculando as somas das colunas relevantes
+    salarios_antes = df.groupby('Cargo')['0996-TOT.PROVENTO'].sum()
+    salarios_depois = df.groupby('Cargo')['novo_0996-TOT.PROVENTO'].sum()
+
+    # Criando um DataFrame com as somas antes e depois
+    df_salarios = pd.DataFrame({'Antes': salarios_antes, 'Depois': salarios_depois})
+
+    # Plotando o gráfico de barras
+    fig_por_cargos, ax = plt.subplots(figsize=(8, 3))  # Definindo o tamanho da figura (largura, altura)
+    df_salarios.plot(kind='bar', ax=ax)
+    ax.set_ylabel('Total de Proventos')
+    ax.set_title('Salários Antes e Depois por Cargo')
+    
+    col1, col2 = st.columns(2)
+    col1.pyplot(fig_por_cargos)
+    col2.pyplot(fig_gratificacoes)
+
+    # Exibindo a figura com Streamlit
+    # st.pyplot(fig_por_cargos)
+
+    # # Calcular as remunerações totais antes e depois
+    # remuneracao_total_anterior = valor_mensal_anterior + impacto_mensal_ant
+    # remuneracao_total_nova = valor_mensal_novo + impacto_mensal_novo
+
+    # # Criar um DataFrame com os totais de remuneração anterior e nova
+    # df_plot = pd.DataFrame({
+    #     'Remuneração Total Anterior': [remuneracao_total_anterior.sum()],
+    #     'Remuneração Total Nova': [remuneracao_total_nova.sum()]
+    # })
+
+    # # Derreter o DataFrame para tornar as colunas de remuneração total em uma coluna
+    # df_plot_melted = df_plot.melt(value_name='Remuneração Total')
+
+    # # Criar o gráfico
+    # fig_date = px.bar(df_plot_melted, x=df_plot_melted.index, y='Remuneração Total', 
+    #                     title='Valores',
+    #                     labels={'Remuneração Total': 'Valor', 'index': 'Tipo'},
+    #                     color='variable',
+    #                     )
+    
+    # # Exibir o gráfico
+    # st.plotly_chart(fig_date, use_container_width=False)
     
     # Nova tabela com o novo salário calculado
     st.write("Servidores:")
