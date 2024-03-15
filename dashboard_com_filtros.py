@@ -120,31 +120,39 @@ def calcular_novo_salario(df, salario_base_b_180,salario_base_c_180,salario_base
 
 def atualizar_ita(row, taxa):
     if row['Grau de instrução'] == "Médio Profissionalizante":
-        return row['REF-ITA'] + (taxa / 100)
+        return (taxa / 100)
     elif row['Grau de instrução'] == "Médio Tecnólogo":
-        return row['REF-ITA'] +  (taxa / 100)
+        return (taxa / 100)
     elif row['Grau de instrução'] == "Graduação":
-        return row['REF-ITA'] +  (taxa / 100)
+        return (taxa / 100)
     elif row['Grau de instrução'] == "Especialização":
-        return row['REF-ITA'] +  (taxa / 100)
+        return (taxa / 100)
     elif row['Grau de instrução'] == "Mestrado":
-        return row['REF-ITA'] +  (taxa / 100)
+        return (taxa / 100)
     elif row['Grau de instrução'] == "Doutorado":
-        return row['REF-ITA'] + (taxa / 100)
+        return (taxa / 100)
     else:
         return row['REF-ITA']
     
 def atualizar_geef(row, taxa):
     if row['Enquadramento do GEEF'] == "Inciso I":
-        return row['REF-GEEF-AMC'] + (taxa / 100)
+        return (taxa / 100)
     elif row['Enquadramento do GEEF'] == "Incisos II e V":
-        return row['REF-GEEF-AMC'] +  (taxa / 100)
+        return (taxa / 100)
     elif row['Enquadramento do GEEF'] == "Inciso IV":
-        return row['REF-GEEF-AMC'] +  (taxa / 100)
+        return (taxa / 100)
     elif row['Enquadramento do GEEF'] == "Inciso III, VI e VII":
-        return row['REF-GEEF-AMC'] +  (taxa / 100)
+        return (taxa / 100)
     else:
         return row['REF-GEEF-AMC']
+    
+    # Função para calcular o novo salário com a dedução da gratificação
+def calcular_novo_salario_com_deducao(df, gratificacao, porcentagem):
+    # Deduz a porcentagem da gratificação escolhida
+    df[gratificacao] -= df[gratificacao] * (porcentagem / 100)
+    # Atualiza o novo salário somando a gratificação deduzida
+    df['Novo Salário'] = df['Novo Salário'] + df[gratificacao]
+    return df
 
 def main():
     
@@ -181,13 +189,12 @@ def main():
         (df['CH'].isin(ch_selecionados))
     ]
     
-    
     st.sidebar.subheader('Configurações: ')
         
     indice_tabela = st.sidebar.number_input('Enquadramento:', min_value=0, value=0)
     df['Ref'] = df['Ref'] + indice_tabela
     
-        #inputs para as taxas de referências:
+    #inputs para as taxas de referências:
     st.sidebar.subheader('Alterar as taxas das referências: ')  
     st.sidebar.write('Se vazio, será usada a atual: ')
     
@@ -205,18 +212,18 @@ def main():
 
     if show_inputs:
         st.session_state.show_inputs = True  
-        
+
     if st.session_state.show_inputs:
         st.sidebar.subheader('Inclua a(s) nova(s) taxa(s) do ITA')
         if st.sidebar.button("Fechar e limpar ITA"):
             st.session_state.show_inputs = False
             st.experimental_rerun()
-        taxa_profissionalizante = st.sidebar.number_input('Médio Profissionalizante  (%)')
-        taxa_tecnologo  = st.sidebar.number_input('Tecnólogo  (%)')
-        taxa_graduação = st.sidebar.number_input('Graduação  (%)')
-        taxa_especialização = st.sidebar.number_input('Especialização (%)')
-        taxa_mestrado = st.sidebar.number_input('Mestrado(%)')
-        taxa_doutorado = st.sidebar.number_input('Doutorado(%)')
+        taxa_profissionalizante = st.sidebar.number_input('Médio Profissionalizante  (%)', value=8)
+        taxa_tecnologo  = st.sidebar.number_input('Tecnólogo  (%)', value=9)
+        taxa_graduação = st.sidebar.number_input('Graduação  (%)', value=10)
+        taxa_especialização = st.sidebar.number_input('Especialização (%)', value=15)
+        taxa_mestrado = st.sidebar.number_input('Mestrado(%)', value=35)
+        taxa_doutorado = st.sidebar.number_input('Doutorado(%)', value=45)
         # Aplicando as atualizações
         if taxa_profissionalizante:
             df['REF-ITA'] = df.apply(lambda row: atualizar_ita(row, taxa_profissionalizante) if row['Grau de instrução'] == "Médio Profissionalizante" else row['REF-ITA'], axis=1)
@@ -245,10 +252,10 @@ def main():
         if st.sidebar.button("Fechar e limpar GEEF"):
             st.session_state.show_inputs_geef = False
             st.experimental_rerun()
-        taxa_inciso_i = st.sidebar.number_input('Inciso I  (%)')
-        taxa_inciso_i_v  = st.sidebar.number_input('Inciso II e V  (%)')
-        taxa_inciso_iv = st.sidebar.number_input('Inciso IV  (%)')
-        taxa_inciso_iii_vi_vii = st.sidebar.number_input('Inciso III, VI e VII (%)')
+        taxa_inciso_i = st.sidebar.number_input('Inciso I  (%)', value=70)
+        taxa_inciso_i_v  = st.sidebar.number_input('Inciso II e V  (%)', value=60)
+        taxa_inciso_iv = st.sidebar.number_input('Inciso IV  (%)', value=30)
+        taxa_inciso_iii_vi_vii = st.sidebar.number_input('Inciso III, VI e VII (%)', value=25)
 
         # Aplicando as atualizações
         if taxa_inciso_i:
@@ -259,8 +266,6 @@ def main():
             df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_iv) if row['Enquadramento do GEEF'] == "Inciso IV" else row['REF-GEEF-AMC'], axis=1)
         if taxa_inciso_iii_vi_vii:
             df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_iii_vi_vii) if row['Enquadramento do GEEF'] == "Inciso III, VI e VII" else row['REF-GEEF-AMC'], axis=1)
-    
-
 
     # Parâmetros Tabela 1
     TC1 = st.sidebar.number_input('Taxa de Classe (%):', value=2)
@@ -286,6 +291,26 @@ def main():
 
     df['Novo Salário'] = calcular_novo_salario(df, valores_b_180,valores_c_180,valores_d_180,valores_b_240,valores_c_240,valores_d_240, pular_indice=indice_tabela)
     
+    gratificacoes = ['GAT', 'GEEF', 'GR R VIDA', 'GE AMC', 'HORA EXTRA NOTURNA']   
+    st.sidebar.subheader('Incorporação de Gratificação')
+    gratificacao_escolhida = st.sidebar.selectbox("Escolha a gratificação a ser incorporada no Salário Base: ", gratificacoes)
+    porcentagem_incorporacao = st.sidebar.number_input('Insira a porcentagem: ')
+    if gratificacao_escolhida == 'GAT':
+        taxa_gat = taxa_gat - porcentagem_incorporacao
+        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+    elif gratificacao_escolhida == 'GEEF':
+        taxa_geef_amc = taxa_geef_amc - porcentagem_incorporacao
+        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+    elif gratificacao_escolhida == 'GR R VIDA':
+        taxa_gr_r_vida = taxa_gr_r_vida - porcentagem_incorporacao
+        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+    elif gratificacao_escolhida == 'GE AMC':
+        taxa_ge_amc = taxa_ge_amc - porcentagem_incorporacao
+        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+    elif gratificacao_escolhida == 'HORA EXTRA NOTURNA':
+        taxa_he_noturna = taxa_he_noturna - porcentagem_incorporacao
+        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+        
     # Adicionando novas colunas
     df['novo_0085-ITA'] = (df['REF-ITA']  * df['Novo Salário'])
     df['novo_0107-ANUENIO'] = ((df['REF-ANUENIO']) * df['Novo Salário'])
@@ -306,7 +331,7 @@ def main():
     df['nova_IPM PREVFOR-PATRONAL'] = df['nova_0801-IPM PREVFOR'] * 0.28
     df['nova_IPM PREVFOR-SERVIDOR'] = df['nova_0801-IPM PREVFOR'] * 0.14
     df['nova_base_IRPF'] = df['novo_0996-TOT.PROVENTO'] -  df['nova_IPM PREVFOR-SERVIDOR']            
-    df['nova_IRPF'] = df['nova_base_IRPF'].apply(calcular_irpf)     
+    df['nova_IRPF'] = df['nova_base_IRPF'].apply(calcular_irpf)  
     
     # Quantidade de pessoas por cargo, carga horária e referência
     quantidade_pessoas = contar_pessoas(df)
@@ -337,7 +362,6 @@ def main():
     provisao_ipm_nova = ((total_novo_salario + provisao_ferias_nova + provisao_decimo_nova) * 0.04)
     provisao_ipm_impacto = provisao_ipm_nova - provisao_ipm_rem_anterior 
     ipm_previfor_anterior = df['IPM PREVFOR-PATRONAL'].sum()
-    
 
     # Adicionar linha com totais à tabela do novo salário
     tabela_com_novo_salario.loc['Total', ['VENCIMENTO BASE', 'Novo Salário']] = [total_vencimento_base, total_novo_salario]
@@ -464,32 +488,6 @@ def main():
     col1.pyplot(fig_por_cargos)
     col2.pyplot(fig_gratificacoes)
 
-    # Exibindo a figura com Streamlit
-    # st.pyplot(fig_por_cargos)
-
-    # # Calcular as remunerações totais antes e depois
-    # remuneracao_total_anterior = valor_mensal_anterior + impacto_mensal_ant
-    # remuneracao_total_nova = valor_mensal_novo + impacto_mensal_novo
-
-    # # Criar um DataFrame com os totais de remuneração anterior e nova
-    # df_plot = pd.DataFrame({
-    #     'Remuneração Total Anterior': [remuneracao_total_anterior.sum()],
-    #     'Remuneração Total Nova': [remuneracao_total_nova.sum()]
-    # })
-
-    # # Derreter o DataFrame para tornar as colunas de remuneração total em uma coluna
-    # df_plot_melted = df_plot.melt(value_name='Remuneração Total')
-
-    # # Criar o gráfico
-    # fig_date = px.bar(df_plot_melted, x=df_plot_melted.index, y='Remuneração Total', 
-    #                     title='Valores',
-    #                     labels={'Remuneração Total': 'Valor', 'index': 'Tipo'},
-    #                     color='variable',
-    #                     )
-    
-    # # Exibir o gráfico
-    # st.plotly_chart(fig_date, use_container_width=False)
-    
     # Nova tabela com o novo salário calculado
     st.write("Servidores:")
     st.dataframe(tabela_com_novo_salario.round(2), use_container_width=True)
