@@ -146,6 +146,18 @@ def atualizar_geef(row, taxa):
     else:
         return row['REF-GEEF-AMC']
     
+def atualizar_gat(row, taxa):
+    if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS":
+        return (taxa / 100)
+    else:
+        return row['REF-GAT']
+    
+def atualizar_ge_amc(row, taxa):
+    if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS":
+        return (taxa / 100)
+    else:
+        return ((taxa/2)/100)
+    
     # Função para calcular o novo salário com a dedução da gratificação
 def calcular_novo_salario_com_deducao(df, gratificacao, porcentagem):
     # Deduz a porcentagem da gratificação escolhida
@@ -198,11 +210,18 @@ def main():
     st.sidebar.subheader('Alterar as taxas das referências: ')  
     st.sidebar.write('Se vazio, será usada a atual: ')
     
-    taxa_gat = st.sidebar.number_input('Gat (%)')
-    taxa_geef_amc = st.sidebar.number_input('Geef-AMC (%)')
+    taxa_gat = st.sidebar.number_input('Gat (%)',min_value=0, max_value=100, value=100)
+    taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0, max_value=100, value=100)
     taxa_gr_r_vida = st.sidebar.number_input('GR.R.VIDA (%)')
-    taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)')
     taxa_he_noturna = st.sidebar.number_input('HE NOTURNA (%)')
+    
+    # Aplicando as atualizações na taxa de GE_AMC para que seja atualizado nas linhas de acordo com o INPUT
+    if taxa_ge_amc:
+        df['REF-GE AMC'] = df.apply(lambda row: atualizar_ge_amc(row, taxa_ge_amc) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GE AMC'], axis=1)    
+    
+    # Aplicando as atualizações na taxa de GAT para que seja atualizado nas linhas de acordo com o INPUT
+    if taxa_gat:
+        df['REF-GAT'] = df.apply(lambda row: atualizar_gat(row, taxa_gat) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GAT'], axis=1)
     
     # Exibindo inputs quando o botão dos ITAs quando for acionado
     show_inputs = st.sidebar.button("Alterar ITA")
@@ -274,12 +293,12 @@ def main():
     num_referencias1 = st.sidebar.number_input('Número de Referências:', value=6, min_value=1)
     salario_base1 = st.sidebar.number_input('Salário Base:', value=1160.66, min_value=0.0)
     
-    salario_base_b_180 = 886.29
-    salario_base_c_180 = 1160.66
-    salario_base_d_180 = 1582.67
-    salario_base_b_240 = 1181.71
-    salario_base_c_240 = 1547.55
-    salario_base_d_240 = 2110.22
+    salario_base_b_180 = st.sidebar.number_input("Salário-base tabela B 180 horas: ", value=886.29)
+    salario_base_c_180 = st.sidebar.number_input("Salário-base tabela C 180 horas: ", value=1160.66)
+    salario_base_d_180 = st.sidebar.number_input("Salário-base tabela D 180 horas: ", value=1582.67)
+    salario_base_b_240 = st.sidebar.number_input("Salário-base tabela B 240 horas: ", value=1181.71)
+    salario_base_c_240 = st.sidebar.number_input("Salário-base tabela C 240 horas: ", value=1547.55)
+    salario_base_d_240 = st.sidebar.number_input("Salário-base tabela D 240 horas: ", value=2110.22)
     
     # Calcular novo salário usando a Tabela 1
     tabela_salarios_b_180, valores_b_180 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base_b_180, 'Tabela B - 180h')
@@ -293,33 +312,35 @@ def main():
     
     gratificacoes = ['GAT', 'GEEF', 'GR R VIDA', 'GE AMC', 'HORA EXTRA NOTURNA']   
     st.sidebar.subheader('Incorporação de Gratificação')
-    gratificacao_escolhida = st.sidebar.selectbox("Escolha a gratificação a ser incorporada no Salário Base: ", gratificacoes)
+    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes)
     porcentagem_incorporacao = st.sidebar.number_input('Insira a porcentagem: ')
-    if gratificacao_escolhida == 'GAT':
-        taxa_gat = taxa_gat - porcentagem_incorporacao
-        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-    elif gratificacao_escolhida == 'GEEF':
-        taxa_geef_amc = taxa_geef_amc - porcentagem_incorporacao
-        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-    elif gratificacao_escolhida == 'GR R VIDA':
-        taxa_gr_r_vida = taxa_gr_r_vida - porcentagem_incorporacao
-        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-    elif gratificacao_escolhida == 'GE AMC':
-        taxa_ge_amc = taxa_ge_amc - porcentagem_incorporacao
-        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-    elif gratificacao_escolhida == 'HORA EXTRA NOTURNA':
-        taxa_he_noturna = taxa_he_noturna - porcentagem_incorporacao
-        df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+
+    for gratificacao_escolhida in gratificacoes_escolhidas:
+        if gratificacao_escolhida == 'GAT':
+            taxa_gat = taxa_gat - porcentagem_incorporacao
+            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'GEEF':
+            taxa_geef_amc = taxa_geef_amc - porcentagem_incorporacao
+            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'GR R VIDA':
+            taxa_gr_r_vida = taxa_gr_r_vida - porcentagem_incorporacao
+            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'GE AMC':
+            taxa_ge_amc = taxa_ge_amc - porcentagem_incorporacao
+            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'HORA EXTRA NOTURNA':
+            taxa_he_noturna = taxa_he_noturna - porcentagem_incorporacao
+            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
         
     # Adicionando novas colunas
     df['novo_0085-ITA'] = (df['REF-ITA']  * df['Novo Salário'])
     df['novo_0107-ANUENIO'] = ((df['REF-ANUENIO']) * df['Novo Salário'])
     df['nova_105-INSALUBRIDAD'] = (( df['REF-INSALUBRIDAD']) * df['Novo Salário'])
     df['nova_0118-GR.PRODUT_'] = ((df['REF-GR.PRODUT']) * df['Novo Salário'])
-    df['nova_0096-GAT'] = (((1+ df['REF-GAT']) * ( 1+ taxa_gat/100) - 1 ) * df['Novo Salário'])
-    df['nova_0097-GEEF-AMC'] = (((1+ df['REF-GEEF-AMC']) * (1 + taxa_geef_amc/100) - 1) * df['Novo Salário'])
+    df['nova_0096-GAT'] = df['REF-GAT'] * df['Novo Salário']
+    df['nova_0097-GEEF-AMC'] = (df['REF-GEEF-AMC']) * df['Novo Salário']
     df['nova_0159-GR.R.VIDA'] = (((1+ df['REF-GR.R.VIDA']) * (1 + taxa_gr_r_vida/100) - 1) * df['Novo Salário'])
-    df['nova_0318-GE AMC'] = (((1+ df['REF-GE AMC']) * ( 1+ taxa_ge_amc/100) - 1 ) * df['Novo Salário'])
+    df['nova_0318-GE AMC'] = (df['REF-GE AMC']) * df['Novo Salário']
     df['novo_0817-B HR INC'] = df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0159-GR.R.VIDA'] + df['nova_0318-GE AMC']
     df['nova_0133-HR.EXTR.INCO'] = round(df['novo_0817-B HR INC'] / df['CH'] * 1.25 * df['REF-HR.EXTR.INCO'],2)
     df['novo_0996-TOT.PROVENTO'] = df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0096-GAT'] + df['nova_0097-GEEF-AMC'] + df['nova_0159-GR.R.VIDA'] + df['nova_0318-GE AMC'] + df['nova_0133-HR.EXTR.INCO'] + df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['0308-DIF.AJ.PCCS'] + df['0320-GAJ 9903/12'] + df['0170-DIR.NIV.SUPE'] + df['0174-VRB.ESP.REP'] + df['0180-DIR.ASS.SUPE'] + df['0190-DIR.NIV.INT.'] + df['058-DIR GER 01'] + df['0326-GTRTC                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           '] + df['0206-AB.PERMANENC']
@@ -331,7 +352,9 @@ def main():
     df['nova_IPM PREVFOR-PATRONAL'] = df['nova_0801-IPM PREVFOR'] * 0.28
     df['nova_IPM PREVFOR-SERVIDOR'] = df['nova_0801-IPM PREVFOR'] * 0.14
     df['nova_base_IRPF'] = df['novo_0996-TOT.PROVENTO'] -  df['nova_IPM PREVFOR-SERVIDOR']            
-    df['nova_IRPF'] = df['nova_base_IRPF'].apply(calcular_irpf)  
+    df['nova_IRPF'] = df['nova_base_IRPF'].apply(calcular_irpf) 
+    
+    st.write(df[['Nome','REF-GE AMC', 'nova_0318-GE AMC', '0318-GE AMC' ]]) 
     
     # Quantidade de pessoas por cargo, carga horária e referência
     quantidade_pessoas = contar_pessoas(df)
