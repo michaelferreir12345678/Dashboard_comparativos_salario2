@@ -291,8 +291,9 @@ def main():
     TR1 = st.sidebar.number_input('Taxa de Referência (%):', value=2)
     num_classes1 = st.sidebar.number_input('Número de Classes:', value=5, min_value=1)
     num_referencias1 = st.sidebar.number_input('Número de Referências:', value=6, min_value=1)
-    salario_base1 = st.sidebar.number_input('Salário Base:', value=1160.66, min_value=0.0)
+    # salario_base1 = st.sidebar.number_input('Salário Base:', value=1160.66, min_value=0.0)
     
+    alterar_sal_base = st.sidebar.button('Alterar Salário base')
     salario_base_b_180 = st.sidebar.number_input("Salário-base tabela B 180 horas: ", value=886.29)
     salario_base_c_180 = st.sidebar.number_input("Salário-base tabela C 180 horas: ", value=1160.66)
     salario_base_d_180 = st.sidebar.number_input("Salário-base tabela D 180 horas: ", value=1582.67)
@@ -300,6 +301,52 @@ def main():
     salario_base_c_240 = st.sidebar.number_input("Salário-base tabela C 240 horas: ", value=1547.55)
     salario_base_d_240 = st.sidebar.number_input("Salário-base tabela D 240 horas: ", value=2110.22)
     
+    gratificacoes = ['GAT', 'GEEF', 'GR R VIDA', 'GE AMC', 'HORA EXTRA NOTURNA']   
+    st.sidebar.subheader('Incorporação de Gratificação')
+    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes)
+    porcentagem_incorporacao = st.sidebar.number_input('Insira a porcentagem: ')
+    for gratificacao_escolhida in gratificacoes_escolhidas:
+        if gratificacao_escolhida == 'GAT':
+            taxa_gat = taxa_gat - porcentagem_incorporacao
+            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'GEEF':
+            taxa_geef_amc = taxa_geef_amc - porcentagem_incorporacao
+            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'GR R VIDA':
+            taxa_gr_r_vida = taxa_gr_r_vida - porcentagem_incorporacao
+            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'GE AMC':
+            taxa_ge_amc = taxa_ge_amc - porcentagem_incorporacao
+            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
+        elif gratificacao_escolhida == 'HORA EXTRA NOTURNA':
+            taxa_he_noturna = taxa_he_noturna - porcentagem_incorporacao
+            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
+            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
+            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
+                        
     # Calcular novo salário usando a Tabela 1
     tabela_salarios_b_180, valores_b_180 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base_b_180, 'Tabela B - 180h')
     tabela_salarios_c_180, valores_c_180 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base_c_180, 'Tabela C - 180h')
@@ -310,27 +357,6 @@ def main():
 
     df['Novo Salário'] = calcular_novo_salario(df, valores_b_180,valores_c_180,valores_d_180,valores_b_240,valores_c_240,valores_d_240, pular_indice=indice_tabela)
     
-    gratificacoes = ['GAT', 'GEEF', 'GR R VIDA', 'GE AMC', 'HORA EXTRA NOTURNA']   
-    st.sidebar.subheader('Incorporação de Gratificação')
-    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes)
-    porcentagem_incorporacao = st.sidebar.number_input('Insira a porcentagem: ')
-
-    for gratificacao_escolhida in gratificacoes_escolhidas:
-        if gratificacao_escolhida == 'GAT':
-            taxa_gat = taxa_gat - porcentagem_incorporacao
-            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'GEEF':
-            taxa_geef_amc = taxa_geef_amc - porcentagem_incorporacao
-            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'GR R VIDA':
-            taxa_gr_r_vida = taxa_gr_r_vida - porcentagem_incorporacao
-            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'GE AMC':
-            taxa_ge_amc = taxa_ge_amc - porcentagem_incorporacao
-            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'HORA EXTRA NOTURNA':
-            taxa_he_noturna = taxa_he_noturna - porcentagem_incorporacao
-            df['Novo Salário'] = df['Novo Salário'] * (1 + (porcentagem_incorporacao/100))
         
     # Adicionando novas colunas
     df['novo_0085-ITA'] = (df['REF-ITA']  * df['Novo Salário'])
@@ -353,8 +379,6 @@ def main():
     df['nova_IPM PREVFOR-SERVIDOR'] = df['nova_0801-IPM PREVFOR'] * 0.14
     df['nova_base_IRPF'] = df['novo_0996-TOT.PROVENTO'] -  df['nova_IPM PREVFOR-SERVIDOR']            
     df['nova_IRPF'] = df['nova_base_IRPF'].apply(calcular_irpf) 
-    
-    st.write(df[['Nome','REF-GE AMC', 'nova_0318-GE AMC', '0318-GE AMC' ]]) 
     
     # Quantidade de pessoas por cargo, carga horária e referência
     quantidade_pessoas = contar_pessoas(df)
@@ -453,7 +477,7 @@ def main():
 
     col1, col2  = st.columns(2)
     col1.text('Impacto Mensal:')
-    col1.info(impacto_mensal_total,)
+    col1.info(impacto_mensal_total)
     col2.text('Impacto Anual: ')
     col2.info(impacto_anual_total)
 
@@ -462,6 +486,16 @@ def main():
     col1.info(variacao_mensal_liquida)
     col2.text('Novo Valor da folha Anual: ')
     col2.info(variacao_anual_liquida)
+    
+    col1,col2, col3, col4 = st.columns(4)
+    col1.text('Taxa GAT')
+    col1.info(f'{taxa_gat} %')
+    col2.text('Taxa GE AMC')
+    col2.info(f'{taxa_ge_amc} %')
+    col3.text('Taxa GR R Vida')
+    col3.info(f'{taxa_gr_r_vida} %')
+    col4.text('Taxa HE Noturna ')
+    col4.info(f'{taxa_he_noturna} %')
     
     # Criando um dicionário com as diferenças antes e depois do Ita
     diferencas_antes = {
@@ -510,15 +544,33 @@ def main():
     col1, col2 = st.columns(2)
     col1.pyplot(fig_por_cargos)
     col2.pyplot(fig_gratificacoes)
+    
+    # Exibir e atualizar a tabela de salários por classe e referência (Tabela 1)
+    tabelas = ['tabela_salarios_b_180','tabela_salarios_c_180','tabela_salarios_d_180','tabela_salarios_b_240','tabela_salarios_c_240','tabela_salarios_d_240']
+    # tabela_salarios1, valores1 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base1, 'Tabela personalizável')
+    st.write("Tabela de Referência")
+    col1, col2 = st.columns(2)
+    option_tabela = col1.selectbox('Mostrar tabela: ', tabelas,)
+    col1, col2 = st.columns(2)
+    if option_tabela == 'tabela_salarios_b_180': 
+        st.dataframe(tabela_salarios_b_180, use_container_width=False)
+    elif option_tabela == 'tabela_salarios_c_180': 
+        st.dataframe(tabela_salarios_c_180, use_container_width=False) 
+    elif option_tabela == 'tabela_salarios_d_180': 
+        st.dataframe(tabela_salarios_d_180, use_container_width=False) 
+    elif option_tabela == 'tabela_salarios_b_240': 
+        st.dataframe(tabela_salarios_b_240, use_container_width=False) 
+    elif option_tabela == 'tabela_salarios_c_240': 
+        st.dataframe(tabela_salarios_c_240, use_container_width=False) 
+    elif option_tabela == 'tabela_salarios_d_240': 
+        st.dataframe(tabela_salarios_d_240, use_container_width=False) 
+        
 
     # Nova tabela com o novo salário calculado
     st.write("Servidores:")
     st.dataframe(tabela_com_novo_salario.round(2), use_container_width=True)
     
-    # Exibir e atualizar a tabela de salários por classe e referência (Tabela 1)
-    tabela_salarios1, valores1 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base1, 'Tabela personalizável')
-    st.write("Tabela de Referência")
-    tabela_salarios1 = st.dataframe(tabela_salarios1, use_container_width=True)
+
     
     # Exibir a tabela de resumo de cargos
     st.header("Impacto da Reestruturação do PCCS da Gestão do Trânsito:",)
