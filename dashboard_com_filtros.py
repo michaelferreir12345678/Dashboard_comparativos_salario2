@@ -211,12 +211,32 @@ def main():
     indice_tabela = st.sidebar.number_input('Enquadramento:', min_value=0, value=0)
     df['Ref'] = df['Ref'] + indice_tabela
     
+    gratificacoes = ['GAT','GEEF', 'GR.R.VIDA', 'GE AMC', 'HE NOTURNA']  
+    
+    # Definindo os valores padrão das taxas
+    default_values = {
+        'GAT': 100,
+        'GE AMC': 100,
+        'GR.R.VIDA': 100,
+        'HE NOTURNA': 0
+    }
+    
+    st.sidebar.subheader('Incorporação de Gratificação')
+    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes)
+    soma_rel  = 1
+    for option in gratificacoes_escolhidas: 
+        valor_input = st.sidebar.number_input(f'Insira o valor que será incorporado para {option} (%):', min_value=0, value=0)
+        if valor_input != 0:
+            valor_relativo = valor_input / 100 + 1  # Converte a porcentagem em número relativo
+            soma_rel *= valor_relativo  # Multiplica os valores relativos
+            default_values[option] -= valor_input  # Atualiza o valor original conforme necessário
+            
     #inputs para as taxas de referências:
     st.sidebar.subheader('Configurações de taxas das gratificações: ')  
     st.sidebar.write('Se vazio, será usada a atual: ')
     
-    taxa_gat = st.sidebar.number_input('Gat (%)',min_value=0, max_value=100, value=100)
-    taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0, max_value=100, value=100)
+    taxa_gat = st.sidebar.number_input('Gat (%)',min_value=0, max_value=100, value=default_values['GAT'])
+    taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0, max_value=100, value=default_values['GE AMC'])
     taxa_gr_r_vida = st.sidebar.number_input('GR.R.VIDA (%)')
     taxa_he_noturna = st.sidebar.number_input('HE NOTURNA (%)')
     
@@ -294,58 +314,14 @@ def main():
 
     # salario_base1 = st.sidebar.number_input('Salário Base:', value=1160.66, min_value=0.0)
     st.sidebar.subheader('Configurações dos salários-base: ')      
-    salario_base_b_180 = st.sidebar.number_input("Salário-base tabela B 180 horas: ", value=886.29)
-    salario_base_c_180 = st.sidebar.number_input("Salário-base tabela C 180 horas: ", value=1160.66)
-    salario_base_d_180 = st.sidebar.number_input("Salário-base tabela D 180 horas: ", value=1582.67)
-    salario_base_b_240 = st.sidebar.number_input("Salário-base tabela B 240 horas: ", value=1181.71)
-    salario_base_c_240 = st.sidebar.number_input("Salário-base tabela C 240 horas: ", value=1547.55)
-    salario_base_d_240 = st.sidebar.number_input("Salário-base tabela D 240 horas: ", value=2110.22)
+    salario_base_b_180 = st.sidebar.number_input("Salário-base tabela B 180 horas: ", value=886.29 * soma_rel)
+    salario_base_c_180 = st.sidebar.number_input("Salário-base tabela C 180 horas: ", value=1160.66 * soma_rel)
+    salario_base_d_180 = st.sidebar.number_input("Salário-base tabela D 180 horas: ", value=1582.67 * soma_rel)
+    salario_base_b_240 = st.sidebar.number_input("Salário-base tabela B 240 horas: ", value=1181.71 * soma_rel)
+    salario_base_c_240 = st.sidebar.number_input("Salário-base tabela C 240 horas: ", value=1547.55 * soma_rel)
+    salario_base_d_240 = st.sidebar.number_input("Salário-base tabela D 240 horas: ", value=2110.22 * soma_rel)
     
-    gratificacoes = ['GAT', 'GEEF', 'GR R VIDA', 'GE AMC', 'HORA EXTRA NOTURNA']   
-    st.sidebar.subheader('Incorporação de Gratificação')
-    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes)
-    porcentagem_incorporacao = st.sidebar.number_input('Insira a porcentagem: ')
-    for gratificacao_escolhida in gratificacoes_escolhidas:
-        if gratificacao_escolhida == 'GAT':
-            taxa_gat = taxa_gat - porcentagem_incorporacao
-            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'GEEF':
-            taxa_geef_amc = taxa_geef_amc - porcentagem_incorporacao
-            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'GR R VIDA':
-            taxa_gr_r_vida = taxa_gr_r_vida - porcentagem_incorporacao
-            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'GE AMC':
-            taxa_ge_amc = taxa_ge_amc - porcentagem_incorporacao
-            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
-        elif gratificacao_escolhida == 'HORA EXTRA NOTURNA':
-            taxa_he_noturna = taxa_he_noturna - porcentagem_incorporacao
-            salario_base_b_180 = salario_base_b_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_180 = salario_base_c_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_180 = salario_base_d_180 * (1 + (porcentagem_incorporacao/100))
-            salario_base_b_240 = salario_base_b_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_c_240 = salario_base_c_240 * (1 + (porcentagem_incorporacao/100))
-            salario_base_d_240 = salario_base_d_240 * (1 + (porcentagem_incorporacao/100))
+
                         
     # Calcular novo salário usando a Tabela 1
     tabela_salarios_b_180, valores_b_180 = exibir_tabela_salarios(TC1, TR1, num_classes1, num_referencias1, salario_base_b_180, 'Tabela B - 180h')
