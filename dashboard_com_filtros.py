@@ -222,7 +222,7 @@ def main():
     }
     
     st.sidebar.subheader('Incorporação de Gratificação')
-    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes)
+    gratificacoes_escolhidas = st.sidebar.multiselect("Escolha as gratificações a serem incorporadas no Salário Base: ", gratificacoes, placeholder="Escolha a gratificação")
     soma_rel  = 1
     for option in gratificacoes_escolhidas: 
         valor_input = st.sidebar.number_input(f'Insira o valor que será incorporado para {option} (%):', min_value=0, value=0)
@@ -239,7 +239,7 @@ def main():
     taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0, max_value=100, value=default_values['GE AMC'])
     taxa_gr_r_vida = st.sidebar.number_input('GR.R.VIDA (%)')
     taxa_he_noturna = st.sidebar.number_input('HE NOTURNA (%)')
-    
+
     # Aplicando as atualizações na taxa de GE_AMC para que seja atualizado nas linhas de acordo com o INPUT
     if taxa_ge_amc:
         df['REF-GE AMC'] = df.apply(lambda row: atualizar_ge_amc(row, taxa_ge_amc) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GE AMC'], axis=1)    
