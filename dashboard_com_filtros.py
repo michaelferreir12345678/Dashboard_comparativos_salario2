@@ -39,7 +39,7 @@ def exibir_tabela_salarios(TC, TR, num_classes, num_referencias, salario_base, n
                 valor = float(tabela.loc[num_referencias, j - 1]) * (1+(TC/100))
             else:
                 valor = float(tabela.loc[i - 1, j]) * (1+(TR/100))
-            
+
             # Armazenando o valor no dicionário
             valores[(i, j)] = valor, i + (j - 1) * num_referencias
             tabela.loc[i, j] = f"{valor:.2f}"  # Atribuindo o índice da célula com duas casas decimais
@@ -201,13 +201,18 @@ def main():
         (df['CH'].isin(ch_selecionados))
     ]
     
-    st.sidebar.subheader('Configurações: ')
+    st.sidebar.subheader('Configurações de parâmetros: ')
+    # Parâmetros Tabela 1
+    TC1 = st.sidebar.number_input('Taxa de Classe (%):', value=2)
+    TR1 = st.sidebar.number_input('Taxa de Referência (%):', value=2)
+    num_classes1 = st.sidebar.number_input('Número de Classes:', value=5, min_value=1)
+    num_referencias1 = st.sidebar.number_input('Número de Referências:', value=6, min_value=1)
         
     indice_tabela = st.sidebar.number_input('Enquadramento:', min_value=0, value=0)
     df['Ref'] = df['Ref'] + indice_tabela
     
     #inputs para as taxas de referências:
-    st.sidebar.subheader('Alterar as taxas das referências: ')  
+    st.sidebar.subheader('Configurações de taxas das gratificações: ')  
     st.sidebar.write('Se vazio, será usada a atual: ')
     
     taxa_gat = st.sidebar.number_input('Gat (%)',min_value=0, max_value=100, value=100)
@@ -286,14 +291,9 @@ def main():
         if taxa_inciso_iii_vi_vii:
             df['REF-GEEF-AMC'] = df.apply(lambda row: atualizar_geef(row, taxa_inciso_iii_vi_vii) if row['Enquadramento do GEEF'] == "Inciso III, VI e VII" else row['REF-GEEF-AMC'], axis=1)
 
-    # Parâmetros Tabela 1
-    TC1 = st.sidebar.number_input('Taxa de Classe (%):', value=2)
-    TR1 = st.sidebar.number_input('Taxa de Referência (%):', value=2)
-    num_classes1 = st.sidebar.number_input('Número de Classes:', value=5, min_value=1)
-    num_referencias1 = st.sidebar.number_input('Número de Referências:', value=6, min_value=1)
+
     # salario_base1 = st.sidebar.number_input('Salário Base:', value=1160.66, min_value=0.0)
-    
-    alterar_sal_base = st.sidebar.button('Alterar Salário base')
+    st.sidebar.subheader('Configurações dos salários-base: ')      
     salario_base_b_180 = st.sidebar.number_input("Salário-base tabela B 180 horas: ", value=886.29)
     salario_base_c_180 = st.sidebar.number_input("Salário-base tabela C 180 horas: ", value=1160.66)
     salario_base_d_180 = st.sidebar.number_input("Salário-base tabela D 180 horas: ", value=1582.67)
