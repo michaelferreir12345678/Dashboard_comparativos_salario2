@@ -152,6 +152,12 @@ def atualizar_gat(row, taxa):
     else:
         return row['REF-GAT']
     
+def atualizar_gr_vida(row, taxa):
+    if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS":
+        return (taxa / 100)
+    else:
+        return row['REF-GR.R.VIDA']    
+
 def atualizar_ge_amc(row, taxa):
     if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS":
         return (taxa / 100)
@@ -217,7 +223,7 @@ def main():
     default_values = {
         'GAT': 100,
         'GE AMC': 100,
-        'GR.R.VIDA': 100,
+        'GR.R.VIDA': 40,
         'HE NOTURNA': 0
     }
     
@@ -237,7 +243,7 @@ def main():
     
     taxa_gat = st.sidebar.number_input('Gat (%)',min_value=0, max_value=100, value=default_values['GAT'])
     taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0, max_value=100, value=default_values['GE AMC'])
-    taxa_gr_r_vida = st.sidebar.number_input('GR.R.VIDA (%)')
+    taxa_gr_r_vida = st.sidebar.number_input('GR.R.VIDA (%)',min_value=0, max_value=100, value=default_values['GR.R.VIDA'])
     taxa_he_noturna = st.sidebar.number_input('HE NOTURNA (%)')
 
     # Aplicando as atualizações na taxa de GE_AMC para que seja atualizado nas linhas de acordo com o INPUT
@@ -247,6 +253,9 @@ def main():
     # Aplicando as atualizações na taxa de GAT para que seja atualizado nas linhas de acordo com o INPUT
     if taxa_gat:
         df['REF-GAT'] = df.apply(lambda row: atualizar_gat(row, taxa_gat) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GAT'], axis=1)
+    
+    if taxa_gr_r_vida:
+        df['REF-GR.R.VIDA'] = df.apply(lambda row: atualizar_gr_vida(row, taxa_gr_r_vida) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GR.R.VIDA'], axis=1)
     
     # Exibindo inputs quando o botão dos ITAs quando for acionado
     show_inputs = st.sidebar.button("Alterar ITA")
@@ -341,7 +350,7 @@ def main():
     df['nova_0118-GR.PRODUT_'] = ((df['REF-GR.PRODUT']) * df['Novo Salário'])
     df['nova_0096-GAT'] = df['REF-GAT'] * df['Novo Salário']
     df['nova_0097-GEEF-AMC'] = (df['REF-GEEF-AMC']) * df['Novo Salário']
-    df['nova_0159-GR.R.VIDA'] = (((1+ df['REF-GR.R.VIDA']) * (1 + taxa_gr_r_vida/100) - 1) * df['Novo Salário'])
+    df['nova_0159-GR.R.VIDA'] = ((df['REF-GR.R.VIDA']) * df['Novo Salário'])
     df['nova_0318-GE AMC'] = (df['REF-GE AMC']) * df['Novo Salário']
     df['novo_0817-B HR INC'] = df['0223-VP'] + df['0248-VPNI HEI'] + df['0001-G.F.INC-DNI1'] + df['0004-G.R.INC.DAS1'] + df['0005-G.R.INC.DAS2'] + df['0006-G.R.INC.DAS3'] + df['0007-G.R.INC.DNS1'] + df['0008-G.R.INC.DNS2'] + df['0009-G.R.INC.DNS3'] + df['0026-GR INC AT1'] + df['0027-GR INC AT2'] + df['Novo Salário'] + df['novo_0085-ITA'] + df['novo_0107-ANUENIO'] + df['nova_105-INSALUBRIDAD'] + df['nova_0118-GR.PRODUT_'] + df['nova_0159-GR.R.VIDA'] + df['nova_0318-GE AMC']
     df['nova_0133-HR.EXTR.INCO'] = round(df['novo_0817-B HR INC'] / df['CH'] * 1.25 * df['REF-HR.EXTR.INCO'],2)
@@ -446,7 +455,7 @@ def main():
     variacao_anual_liquida = formatar_moeda(valor_anual_novo + (impacto_mensal_novo*12))
     
     percentual_efetivo_aumento_mensal = ((impacto_mensal + impacto_mensal_impacto)/(valor_mensal_anterior + impacto_mensal_ant))*100
-
+    
     # col1, col2 = st.columns(2)
     st.markdown('##### **PERCENTUAL AUMENTO EFETIVO:**')
     st.info(f'{round(percentual_efetivo_aumento_mensal,2)} %')
@@ -491,21 +500,22 @@ def main():
     }
     
     diferencas = {}
+    diferencas_real = {}
     for chave in diferencas_antes:
+        diferencas_real[chave] = formatar_moeda(diferencas_depois[chave] - diferencas_antes[chave])
         diferencas[chave] = ((diferencas_depois[chave] - diferencas_antes[chave]) / diferencas_antes[chave]) * 100
         
     col1, col2, col3, col4, col5 = st.columns(5)
-    
     col1.text('Impacto % ITA')
-    col1.info(f'{round(diferencas["ITA"],2)} %')
+    col1.info(f'{diferencas_real['ITA']}   |   {round(diferencas["ITA"],2)} %')
     col2.text('Impacto % GAT')
-    col2.info(f'{round(diferencas["GAT"], 2)} %')
+    col2.info(f'{diferencas_real['GAT']}   |   {round(diferencas["GAT"], 2)} %')
     col3.text('Impacto % GEEF-AMC')
-    col3.info(f'{round(diferencas["GEEF-AMC"], 2)} %')
+    col3.info(f'{diferencas_real['GEEF-AMC']}   |   {round(diferencas["GEEF-AMC"], 2)} %')
     col4.text('Impacto % GR.R.VIDA')
-    col4.info(f'{round(diferencas["GR.R.VIDA"], 2)} %')
+    col4.info(f'{diferencas_real['GR.R.VIDA']}   |   {round(diferencas["GR.R.VIDA"], 2)} %')
     col5.text('Impacto % GE AMC')
-    col5.info(f'{round(diferencas["GE AMC"], 2)} %')
+    col5.info(f'{diferencas_real['GE AMC']}   |   {round(diferencas["GE AMC"], 2)} %')
 
     # Convertendo os dicionários em DataFrames
     df_diferencas_antes = pd.DataFrame.from_dict(diferencas_antes, orient='index', columns=['Antes'])
