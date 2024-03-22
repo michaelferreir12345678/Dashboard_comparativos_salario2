@@ -230,7 +230,7 @@ def main():
             valor_relativo = valor_input / 100 + 1  # Converte a porcentagem em número relativo
             soma_rel *= valor_relativo  # Multiplica os valores relativos
             default_values[option] -= valor_input  # Atualiza o valor original conforme necessário
-            
+        
     #inputs para as taxas de referências:
     st.sidebar.subheader('Configurações de taxas das gratificações: ')  
     st.sidebar.write('Se vazio, será usada a atual: ')
@@ -489,6 +489,24 @@ def main():
         'GR.R.VIDA': df['nova_0159-GR.R.VIDA'].sum(),
         'GE AMC': df['nova_0318-GE AMC'].sum()
     }
+    
+    diferencas = {}
+    for chave in diferencas_antes:
+        diferencas[chave] = ((diferencas_depois[chave] - diferencas_antes[chave]) / diferencas_antes[chave]) * 100
+        
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    st.info()
+    col1.text('Impacto % ITA')
+    col1.info(f'{round(diferencas["ITA"],2)} %')
+    col2.text('Impacto % GAT')
+    col2.info(f'{round(diferencas["GAT"], 2)} %')
+    col3.text('Impacto % GEEF-AMC')
+    col3.info(f'{round(diferencas["GEEF-AMC"], 2)} %')
+    col4.text('Impacto % GR.R.VIDA')
+    col4.info(f'{round(diferencas["GR.R.VIDA"], 2)} %')
+    col5.text('Impacto % GE AMC')
+    col5.info(f'{round(diferencas["GE AMC"], 2)} %')
 
     # Convertendo os dicionários em DataFrames
     df_diferencas_antes = pd.DataFrame.from_dict(diferencas_antes, orient='index', columns=['Antes'])
