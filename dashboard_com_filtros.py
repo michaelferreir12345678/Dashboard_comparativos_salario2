@@ -509,13 +509,13 @@ def main():
     col1.text('Impacto % ITA')
     col1.info(f"{diferencas_real['ITA']}   |   {round(diferencas['ITA'],2)} %")
     col2.text('Impacto % GAT')
-    col2.info(f'{diferencas_real['GAT']}   |   {round(diferencas["GAT"], 2)} %')
+    col2.info(f"{diferencas_real['GAT']}   |   {round(diferencas["GAT"], 2)} %")
     col3.text('Impacto % GEEF-AMC')
-    col3.info(f'{diferencas_real['GEEF-AMC']}   |   {round(diferencas["GEEF-AMC"], 2)} %')
+    col3.info(f"{diferencas_real['GEEF-AMC']}   |   {round(diferencas["GEEF-AMC"], 2)} %")
     col4.text('Impacto % GR.R.VIDA')
-    col4.info(f'{diferencas_real['GR.R.VIDA']}   |   {round(diferencas["GR.R.VIDA"], 2)} %')
+    col4.info(f"{diferencas_real['GR.R.VIDA']}   |   {round(diferencas["GR.R.VIDA"], 2)} %")
     col5.text('Impacto % GE AMC')
-    col5.info(f'{diferencas_real['GE AMC']}   |   {round(diferencas["GE AMC"], 2)} %')
+    col5.info(f"{diferencas_real['GE AMC']}   |   {round(diferencas["GE AMC"], 2)} %")
 
     # Convertendo os dicionários em DataFrames
     df_diferencas_antes = pd.DataFrame.from_dict(diferencas_antes, orient='index', columns=['Antes'])
