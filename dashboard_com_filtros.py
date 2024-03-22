@@ -507,7 +507,7 @@ def main():
         
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.text('Impacto % ITA')
-    col1.info(f'{diferencas_real['ITA']}   |   {round(diferencas["ITA"],2)} %')
+    col1.info(f"{diferencas_real['ITA']}   |   {round(diferencas['ITA'],2)} %")
     col2.text('Impacto % GAT')
     col2.info(f'{diferencas_real['GAT']}   |   {round(diferencas["GAT"], 2)} %')
     col3.text('Impacto % GEEF-AMC')
