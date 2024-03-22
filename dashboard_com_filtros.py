@@ -496,7 +496,6 @@ def main():
         
     col1, col2, col3, col4, col5 = st.columns(5)
     
-    st.info()
     col1.text('Impacto % ITA')
     col1.info(f'{round(diferencas["ITA"],2)} %')
     col2.text('Impacto % GAT')
