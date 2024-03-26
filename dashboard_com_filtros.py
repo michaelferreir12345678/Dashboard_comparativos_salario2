@@ -232,29 +232,28 @@ def main():
     soma_rel  = 1
     for option in gratificacoes_escolhidas: 
         valor_input = st.sidebar.number_input(f'Insira o valor que será incorporado para {option} (%):', min_value=0, value=0)
-        if valor_input != 0:
-            valor_relativo = valor_input / 100 + 1  # Converte a porcentagem em número relativo
-            soma_rel *= valor_relativo  # Multiplica os valores relativos
-            default_values[option] -= valor_input  # Atualiza o valor original conforme necessário
+        valor_relativo = valor_input / 100 + 1  # Converte a porcentagem em número relativo
+        soma_rel *= valor_relativo  # Multiplica os valores relativos
+        default_values[option] -= valor_input  # Atualiza o valor original conforme necessário
         
     #inputs para as taxas de referências:
     st.sidebar.subheader('Configurações de taxas das gratificações: ')  
     st.sidebar.write('Se vazio, será usada a atual: ')
     
     taxa_gat = st.sidebar.number_input('Gat (%)',min_value=0, max_value=100, value=default_values['GAT'])
-    taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0, max_value=100, value=default_values['GE AMC'])
+    taxa_ge_amc = st.sidebar.number_input('GE-AMC (%)',min_value=0,max_value=100, value=default_values['GE AMC'])
     taxa_gr_r_vida = st.sidebar.number_input('GR.R.VIDA (%)',min_value=0, max_value=100, value=default_values['GR.R.VIDA'])
     taxa_he_noturna = st.sidebar.number_input('HE NOTURNA (%)')
 
     # Aplicando as atualizações na taxa de GE_AMC para que seja atualizado nas linhas de acordo com o INPUT
-    if taxa_ge_amc:
+    if taxa_ge_amc is not None:
         df['REF-GE AMC'] = df.apply(lambda row: atualizar_ge_amc(row, taxa_ge_amc) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GE AMC'], axis=1)    
     
     # Aplicando as atualizações na taxa de GAT para que seja atualizado nas linhas de acordo com o INPUT
-    if taxa_gat:
+    if taxa_gat is not None:
         df['REF-GAT'] = df.apply(lambda row: atualizar_gat(row, taxa_gat) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GAT'], axis=1)
-    
-    if taxa_gr_r_vida:
+
+    if taxa_gr_r_vida is not None:
         df['REF-GR.R.VIDA'] = df.apply(lambda row: atualizar_gr_vida(row, taxa_gr_r_vida) if row['Cargo'] == "AGENTE MUNIC FISCALIZ DE TRANS" else row['REF-GR.R.VIDA'], axis=1)
     
     # Exibindo inputs quando o botão dos ITAs quando for acionado
@@ -447,6 +446,8 @@ def main():
     impacto_anual = valor_anual_novo - valor_anual_anterior
     
    # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
+    
+    st.write(df)
     
     impacto_mensal_total = formatar_moeda(impacto_mensal_impacto)
     impacto_anual_total = formatar_moeda((impacto_mensal_impacto * 12))
