@@ -454,7 +454,7 @@ def main():
     variacao_mensal_liquida = formatar_moeda(valor_mensal_novo + impacto_mensal_novo)
     variacao_anual_liquida = formatar_moeda(valor_anual_novo + (impacto_mensal_novo*12))
     
-    percentual_efetivo_aumento_mensal = ((impacto_mensal + impacto_mensal_impacto)/(valor_mensal_anterior + impacto_mensal_ant))*100
+    percentual_efetivo_aumento_mensal = ((impacto_mensal_impacto - impacto_mensal)/(impacto_mensal_ant - valor_mensal_anterior))*100
     
     # col1, col2 = st.columns(2)
     st.markdown('##### **PERCENTUAL AUMENTO EFETIVO:**')
@@ -602,9 +602,9 @@ def main():
     # Criar DataFrame com os totais
     dados_totais = {
         'Item': ['Impacto Líquido Mensal', 'Impacto Líquido Anual'],
-        'Remuneração Anterior': [valor_mensal_anterior + impacto_mensal_ant, valor_anual_anterior + (impacto_mensal_ant*12)   ],
-        'Remuneração Nova': [valor_mensal_novo + impacto_mensal_novo, valor_anual_novo + (impacto_mensal_novo*12) ],
-        'Impacto': [impacto_mensal + impacto_mensal_impacto,  impacto_anual + (impacto_mensal_impacto*12)]
+        'Remuneração Anterior': [impacto_mensal_ant - valor_mensal_anterior, (impacto_mensal_ant*12 - valor_anual_anterior)   ],
+        'Remuneração Nova': [impacto_mensal_novo - valor_mensal_novo, (impacto_mensal_novo*12) - valor_anual_novo],
+        'Impacto': [impacto_mensal_impacto - impacto_mensal,  (impacto_mensal_impacto*12) - impacto_anual]
     }
         
     tabela_dados_totais = pd.DataFrame(dados_totais)
@@ -614,7 +614,7 @@ def main():
     tabela_dados_totais['Remuneração Nova'] = tabela_dados_totais['Remuneração Nova'].apply(lambda x: formatar_moeda(x))
     tabela_dados_totais['Impacto'] = tabela_dados_totais['Impacto'].apply(lambda x: formatar_moeda(x))
     
-    st.header("Totais:")
+    st.header("Totais Líquidos:")
     st.dataframe(tabela_dados_totais, use_container_width=True)
     
 if __name__ == '__main__':
