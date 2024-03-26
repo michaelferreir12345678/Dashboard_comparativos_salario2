@@ -448,8 +448,8 @@ def main():
     
    # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
     
-    impacto_mensal_total = formatar_moeda(impacto_mensal + impacto_mensal_impacto)
-    impacto_anual_total = formatar_moeda(impacto_anual + (impacto_mensal_impacto * 12))
+    impacto_mensal_total = formatar_moeda(impacto_mensal_impacto)
+    impacto_anual_total = formatar_moeda((impacto_mensal_impacto * 12))
     
     variacao_mensal_liquida = formatar_moeda(valor_mensal_novo + impacto_mensal_novo)
     variacao_anual_liquida = formatar_moeda(valor_anual_novo + (impacto_mensal_novo*12))
