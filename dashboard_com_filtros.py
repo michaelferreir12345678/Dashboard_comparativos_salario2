@@ -446,9 +446,7 @@ def main():
     impacto_anual = valor_anual_novo - valor_anual_anterior
     
    # ------------------------------------------------------------------ TABELAS, GRÁFICOS E DATAFRAMES ------------------------------------------------------------ #
-    
-    st.write(df)
-    
+   
     impacto_mensal_total = formatar_moeda(impacto_mensal_impacto)
     impacto_anual_total = formatar_moeda((impacto_mensal_impacto * 12))
     
